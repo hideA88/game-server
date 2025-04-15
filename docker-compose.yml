@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  minecraft:
+    image: itzg/minecraft-bedrock-server
+    container_name: minecraft-bedrock-server
+    volumes:
+      - ./games/minecraft/data:/data
+      - ./games/minecraft/data/worlds:/data/worlds
+      - ./shared/logs:/var/log/minecraft
+    ports:
+      - "19132:19132/udp"  # IPv4 gameplay
+      - "19133:19133/udp"  # IPv6 gameplay
+    environment:
+      - EULA=TRUE
+      - GAMEMODE=survival
+      - DIFFICULTY=normal
+      - LEVEL_NAME=${MINECRAFT_LEVEL_NAME:-Bedrock level}
+      - ALLOW_CHEATS=false
+      - MAX_PLAYERS=10
+      - ONLINE_MODE=true
+      - WHITE_LIST=false
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+        reservations:
+          memory: 4G
+    restart: unless-stopped
+
+volumes:
+  minecraft-data: 
