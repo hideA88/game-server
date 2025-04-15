@@ -1,0 +1,23 @@
+# Environment variables
+.env
+
+# Game data directories
+games/*/data/
+games/*/config/*.json
+games/*/config/*.properties
+
+# Log files
+shared/logs/*
+
+# Docker volumes
+volumes/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS specific files
+.DS_Store
+Thumbs.db 
