@@ -29,6 +29,7 @@ services:
     restart: unless-stopped
   rust:
     image: didstopia/rust-server
+    container_name: rust-server
     ports:
       - 28015-28016:28015-28016
       - 28015:28015/udp
