@@ -1,10 +1,4 @@
 services:
-  game-server-base:
-    build:
-      context: ./games/base
-      dockerfile: Dockerfile
-    image: game-server-base:latest
-
   minecraft:
     image: itzg/minecraft-bedrock-server
     container_name: minecraft-bedrock-server
@@ -34,34 +28,42 @@ services:
           memory: 4G
     restart: unless-stopped
   rust:
-    build:
-      context: ./games/rust
-      dockerfile: Dockerfile
-    container_name: rust-server
+    image: didstopia/rust-server
     ports:
-      - "28015:28015/udp"  # ゲームポート
-      - "28016:28016/udp"  # RCONポート
-      - "28017:28017/udp"  # アプリケーションポート
+      - 28015-28016:28015-28016
+      - 28015:28015/udp
+      - 8080:8080
     volumes:
-      - ./games/rust/data:/steamcmd/games/Rust
-      - ./games/rust/scripts/start.sh:/steamcmd/games/start.sh
-      - ./games/rust/backup:/backup
+      - rustds-data:/steamcmd/rust
+      - ./games/rust/logs:/steamcmd/rust/logs
     environment:
-      - SERVER_NAME=${RUST_SERVER_NAME}
-      - SERVER_DESCRIPTION=${RUST_SERVER_DESCRIPTION}
-      - MAX_PLAYERS=${RUST_MAX_PLAYERS}
-      - SEED=${RUST_SEED}
-      - WORLD_SIZE=${RUST_WORLD_SIZE}
-      - SAVE_INTERVAL=${RUST_SAVE_INTERVAL}
-      - LANG=ja_JP.UTF-8
-      - LANGUAGE=ja_JP:ja
-      - LC_ALL=ja_JP.UTF-8
+      TZ: Asia/Tokyo
+      RUST_SERVER_STARTUP_ARGUMENTS: -batchmode -nographics  +decay.scale 0.3
+      RUST_SERVER_IDENTITY: ${RUST_SERVER_IDENTITY:-rust}
+      RUST_SERVER_SEED: ${RUST_SERVER_SEED:-1234568}
+      RUST_SERVER_NAME: ${RUST_SERVER_NAME:-Rust dedicated server}
+      RUST_SERVER_DESCRIPTION: ${RUST_SERVER_DESCRIPTION:-A playroom for PlusUltra members.}
+      RUST_SERVER_URL: ${RUST_SERVER_URL:-https://xxx.xxx.xxx/}
+      RUST_SERVER_BANNER_URL: ${RUST_SERVER_BANNER_URL:-http://xxx.xxx.xxx/banner.jpg}
+      RUST_RCON_PASSWORD: ${RUST_RCON_PASSWORD:-xxxxxxxxxxxxxxxx}
+      RUST_UPDATE_CHECKING: ${RUST_UPDATE_CHECKING:-1}
+      RUST_SERVER_WORLDSIZE: ${RUST_SERVER_WORLDSIZE:-3500}
+      RUST_SERVER_MAXPLAYERS: ${RUST_SERVER_MAXPLAYERS:-15}
+      RUST_SERVER_SAVE_INTERVAL: ${RUST_SERVER_SAVE_INTERVAL:-300}
+      RUST_OXIDE_ENABLED: 1
     deploy:
       resources:
         limits:
-          memory: 16G
+          cpus: '4'
+          memory: 64G
         reservations:
+          cpus: '2'
           memory: 8G
-    restart: unless-stopped
-    depends_on:
-      - game-server-base
+      replicas: 1
+      restart_policy:
+        condition: any
+      update_config:
+        parallelism: 1
+
+volumes:
+  rustds-data:

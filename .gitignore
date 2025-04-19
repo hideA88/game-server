@@ -8,6 +8,7 @@ games/*/config/*.properties
 
 # Log files
 shared/logs/*
+games/*/logs/
 
 # Docker volumes
 volumes/
