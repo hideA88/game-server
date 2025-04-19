@@ -1,4 +1,3 @@
-
 services:
   game-server-base:
     build:
@@ -28,11 +27,12 @@ services:
     deploy:
       resources:
         limits:
+          cpus: '4'
           memory: 16G
         reservations:
+          cpus: '2'
           memory: 4G
     restart: unless-stopped
-
   rust:
     build:
       context: ./games/rust
@@ -53,6 +53,9 @@ services:
       - SEED=${RUST_SEED}
       - WORLD_SIZE=${RUST_WORLD_SIZE}
       - SAVE_INTERVAL=${RUST_SAVE_INTERVAL}
+      - LANG=ja_JP.UTF-8
+      - LANGUAGE=ja_JP:ja
+      - LC_ALL=ja_JP.UTF-8
     deploy:
       resources:
         limits:
@@ -62,6 +65,3 @@ services:
     restart: unless-stopped
     depends_on:
       - game-server-base
-
-volumes:
-  minecraft-data: 

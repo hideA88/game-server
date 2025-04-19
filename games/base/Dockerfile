@@ -33,6 +33,18 @@ ENV PATH=$PATH:$STEAMCMD_HOME
 COPY scripts/entrypoint.sh /steamcmd/entrypoint.sh
 RUN chmod +x /steamcmd/entrypoint.sh
 
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=ja_JP.UTF-8
+ENV LANGUAGE=ja_JP:ja
+ENV LC_ALL=ja_JP.UTF-8
+
+RUN apt update && \
+    apt install -y locales && \
+    sed -i '/ja_JP.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen && \
+    update-locale LANG=ja_JP.UTF-8
+
 # ボリュームの設定
 VOLUME ["/steamcmd/games"]
 
