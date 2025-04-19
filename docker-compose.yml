@@ -1,6 +1,11 @@
-version: '3.8'
 
 services:
+  game-server-base:
+    build:
+      context: ./games/base
+      dockerfile: Dockerfile
+    image: game-server-base:latest
+
   minecraft:
     image: itzg/minecraft-bedrock-server
     container_name: minecraft-bedrock-server
@@ -27,6 +32,35 @@ services:
         reservations:
           memory: 4G
     restart: unless-stopped
+
+  rust:
+    build:
+      context: ./games/rust
+      dockerfile: Dockerfile
+    container_name: rust-server
+    ports:
+      - "28015:28015/udp"  # ゲームポート
+      - "28016:28016/udp"  # RCONポート
+      - "28017:28017/udp"  # アプリケーションポート
+    volumes:
+      - ./games/rust/data:/steamcmd/games/Rust
+      - ./games/rust/backup:/backup
+    environment:
+      - SERVER_NAME=${RUST_SERVER_NAME}
+      - SERVER_DESCRIPTION=${RUST_SERVER_DESCRIPTION}
+      - MAX_PLAYERS=${RUST_MAX_PLAYERS}
+      - SEED=${RUST_SEED}
+      - WORLD_SIZE=${RUST_WORLD_SIZE}
+      - SAVE_INTERVAL=${RUST_SAVE_INTERVAL}
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+        reservations:
+          memory: 8G
+    restart: unless-stopped
+    depends_on:
+      - game-server-base
 
 volumes:
   minecraft-data: 
