@@ -44,6 +44,7 @@ services:
       - "28017:28017/udp"  # アプリケーションポート
     volumes:
       - ./games/rust/data:/steamcmd/games/Rust
+      - ./games/rust/scripts/start.sh:/steamcmd/games/start.sh
       - ./games/rust/backup:/backup
     environment:
       - SERVER_NAME=${RUST_SERVER_NAME}

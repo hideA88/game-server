@@ -14,6 +14,7 @@ RUN dpkg --add-architecture i386 && \
     bzip2 \
     gzip \
     unzip \
+    less \
     && rm -rf /var/lib/apt/lists/*
 
 # SteamCMDのインストール

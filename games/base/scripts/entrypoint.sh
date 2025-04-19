@@ -16,10 +16,10 @@ if [ -n "$GAME_ID" ] && [ -n "$GAME_NAME" ]; then
 fi
 
 # カスタムスクリプトの実行
-if [ -f "/steamcmd/games/$GAME_NAME/scripts/start.sh" ]; then
+if [ -f "/steamcmd/games/start.sh" ]; then
     echo "Running custom start script..."
-    chmod +x /steamcmd/games/$GAME_NAME/scripts/start.sh
-    exec /steamcmd/games/$GAME_NAME/scripts/start.sh
+    chmod +x /steamcmd/games/start.sh
+    exec /steamcmd/games/start.sh
 else
     # デフォルトの起動コマンド
     echo "Starting game server..."
