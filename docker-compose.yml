@@ -66,5 +66,82 @@ services:
       update_config:
         parallelism: 1
 
+  ark-island:
+    build: .
+    image: acekorneya/asa_server:latest
+    container_name: ark-island
+    restart: unless-stopped
+    environment:
+      - PUID=1001                            # The UID to run server as
+      - PGID=1001                            # The GID to run server as
+      - BATTLEEYE=FALSE                      # Set to TRUE to use BattleEye, FALSE to not use BattleEye
+      - RCON_ENABLED=TRUE                    # Needed for Graceful Shutdown / Updates / Server Notifications
+      - DISPLAY_POK_MONITOR_MESSAGE=FALSE    # TRUE to Show the Server Monitor Messages / Update Monitor 
+      - UPDATE_SERVER=TRUE                   # Enable or disable update checks
+      - CHECK_FOR_UPDATE_INTERVAL=24         # Check for Updates interval in hours
+      - UPDATE_WINDOW_MINIMUM_TIME=12:00 AM  # Defines the minimum time, relative to server time, when an update check should run
+      - UPDATE_WINDOW_MAXIMUM_TIME=11:59 PM  # Defines the maximum time, relative to server time, when an update check should run
+      - RESTART_NOTICE_MINUTES=30            # Duration in minutes for notifying players before a server restart due to updates
+      - ENABLE_MOTD=FALSE                    # Enable or disable Message of the Day
+      - MOTD=                                # Message of the Day
+      - MOTD_DURATION=30                     # Duration for the Message of the Day
+      - MAP_NAME=TheIsland
+      - SESSION_NAME=${ARK_ISLAND_SESSION_NAME:-ark-island}
+      - SERVER_ADMIN_PASSWORD=${ARK_SERVER_ADMIN_PASSOWRD:-adminpassword}
+      - SERVER_PASSWORD=${ARK_SERVER_PASSWORD:-password}         # Set a server password or leave it blank (ONLY NUMBERS AND CHARACTERS ARE ALLOWED BY DEVS)
+      - ASA_PORT=7777
+      - RCON_PORT=27020
+      - MAX_PLAYERS=19
+      - CLUSTER_ID=cluster
+      - MOD_IDS=933975,929868,935528         # Add your mod IDs here, separated by commas, e.g., 123456789,987654321
+      - CUSTOM_SERVER_ARGS=                  # If You need to add more Custom Args -ForceRespawnDinos -ForceAllowCaveFlyers
+    ports:
+      - "7777:7777/tcp"
+      - "7777:7777/udp"
+    volumes:
+      - "./games/ark/ASA_Island:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame"
+      - "./games/ark/Dedicated Server:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server"
+      - "./games/ark/Cluster:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ShooterGame"
+    mem_limit: 32G 
+  ark-scorched:
+    build: .
+    image: acekorneya/asa_server:latest
+    container_name: ark-scorched
+    restart: unless-stopped
+    environment:
+      - PUID=1001                            # The UID to run server as
+      - PGID=1001                            # The GID to run server as
+      - BATTLEEYE=FALSE                      # Set to TRUE to use BattleEye, FALSE to not use BattleEye
+      - RCON_ENABLED=TRUE                    # Needed for Graceful Shutdown / Updates / Server Notifications
+      - DISPLAY_POK_MONITOR_MESSAGE=FALSE    # TRUE to Show the Server Monitor Messages / Update Monitor 
+      - UPDATE_SERVER=TRUE                   # Enable or disable update checks
+      - CHECK_FOR_UPDATE_INTERVAL=24         # Check for Updates interval in hours
+      - UPDATE_WINDOW_MINIMUM_TIME=12:00 AM  # Defines the minimum time, relative to server time, when an update check should run
+      - UPDATE_WINDOW_MAXIMUM_TIME=11:59 PM  # Defines the maximum time, relative to server time, when an update check should run
+      - RESTART_NOTICE_MINUTES=30            # Duration in minutes for notifying players before a server restart due to updates
+      - ENABLE_MOTD=FALSE                    # Enable or disable Message of the Day
+      - MOTD=                                # Message of the Day
+      - MOTD_DURATION=30                     # Duration for the Message of the Day
+      - MAP_NAME=ScorchedEarth
+      - SESSION_NAME=${ARK_SCORCHED_SESSION_NAME:-ark-scorched}
+      - SERVER_ADMIN_PASSWORD=${ARK_SERVER_ADMIN_PASSOWRD:-adminpassword}
+      - SERVER_PASSWORD=${ARK_SERVER_PASSWORD:-password}         # Set a server password or leave it blank (ONLY NUMBERS AND CHARACTERS ARE ALLOWED BY DEVS)
+      - ASA_PORT=7778
+      - RCON_PORT=27021
+      - MAX_PLAYERS=19
+      - CLUSTER_ID=cluster
+      - MOD_IDS=933975,929868,935528         # Add your mod IDs here, separated by commas, e.g., 123456789,987654321
+      - CUSTOM_SERVER_ARGS=                  # If You need to add more Custom Args -ForceRespawnDinos -ForceAllowCaveFlyers
+    ports:
+      - "7778:7778/tcp"
+      - "7778:7778/udp"
+    volumes:
+      - "./games/ark/scorchedEarth/ASA_scorchedEarth:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame"
+      - "./games/ark/scorchedEarth/Dedicated_Server:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server"
+      - "./games/ark/Cluster:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ShooterGame"
+      - "./games/ark/config/Game.ini:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame/Saved/Config/WindowsServer/Game.ini"
+      - "./games/ark/config/GameUserSettings.ini:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini"
+    mem_limit: 32G 
+
 volumes:
   rustds-data:
