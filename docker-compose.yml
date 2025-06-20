@@ -1,14 +1,47 @@
 services:
+  game-watchdog:
+    image: ghcr.io/hidea88/game-server-watchdog:latest
+    container_name: game-watchdog
+    restart: unless-stopped
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - ALLOWED_CHANNEL_IDS=${ALLOWED_CHANNEL_IDS}
+      - ALLOWED_USER_IDS=${ALLOWED_USER_IDS}
+      - DOCKER_COMPOSE_PATH=/config/docker-compose.yml
+      - DOCKER_COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME:-game-server}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+    volumes:
+      # Docker ソケット（必須）
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # ゲームサーバーの docker-compose.yml（必須）
+      - ./docker-compose.yml:/config/docker-compose.yml:ro
+      # ホストのシステム情報にアクセス（監視機能用）
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+
   minecraft:
     image: itzg/minecraft-bedrock-server
     container_name: minecraft-bedrock-server
+    labels:
+      # game-watchdogが認識するためのラベル
+      - "game.type=minecraft"
     volumes:
       - ./games/minecraft/data:/data
       - ./games/minecraft/data/worlds:/data/worlds
       - ./shared/logs:/var/log/minecraft
     ports:
-      - "19132:19132/udp"  # IPv4 gameplay
-      - "19133:19133/udp"  # IPv6 gameplay
+      - "19132:19132/udp" # IPv4 gameplay
+      - "19133:19133/udp" # IPv6 gameplay
     environment:
       - EULA=TRUE
       - GAMEMODE=survival
@@ -27,9 +60,19 @@ services:
           cpus: '2'
           memory: 4G
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "nc", "-z", "-v", "localhost", "19132"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   rust:
     image: didstopia/rust-server
     container_name: rust-server
+    labels:
+      # game-watchdogが認識するためのラベル
+      - "game.type=rust"
     ports:
       - 28015-28016:28015-28016
       - 28015:28015/udp
@@ -60,41 +103,51 @@ services:
         reservations:
           cpus: '2'
           memory: 8G
-      replicas: 1
-      restart_policy:
-        condition: any
-      update_config:
-        parallelism: 1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pgrep", "RustDedicated"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   ark-island:
     build: .
     image: acekorneya/asa_server:latest
     container_name: ark-island
+    labels:
+      # game-watchdogが認識するためのラベル
+      - "game.type=ark"
     restart: unless-stopped
     environment:
-      - PUID=1001                            # The UID to run server as
-      - PGID=1001                            # The GID to run server as
-      - BATTLEEYE=FALSE                      # Set to TRUE to use BattleEye, FALSE to not use BattleEye
-      - RCON_ENABLED=TRUE                    # Needed for Graceful Shutdown / Updates / Server Notifications
-      - DISPLAY_POK_MONITOR_MESSAGE=FALSE    # TRUE to Show the Server Monitor Messages / Update Monitor 
-      - UPDATE_SERVER=TRUE                   # Enable or disable update checks
-      - CHECK_FOR_UPDATE_INTERVAL=24         # Check for Updates interval in hours
-      - UPDATE_WINDOW_MINIMUM_TIME=12:00 AM  # Defines the minimum time, relative to server time, when an update check should run
-      - UPDATE_WINDOW_MAXIMUM_TIME=11:59 PM  # Defines the maximum time, relative to server time, when an update check should run
-      - RESTART_NOTICE_MINUTES=30            # Duration in minutes for notifying players before a server restart due to updates
-      - ENABLE_MOTD=FALSE                    # Enable or disable Message of the Day
-      - MOTD=                                # Message of the Day
-      - MOTD_DURATION=30                     # Duration for the Message of the Day
+      - PUID=1001
+      - PGID=1001
+      - BATTLEEYE=FALSE
+      - RCON_ENABLED=TRUE
+      - DISPLAY_POK_MONITOR_MESSAGE=FALSE
+      - UPDATE_SERVER=TRUE
+      - CHECK_FOR_UPDATE_INTERVAL=24
+      - UPDATE_WINDOW_MINIMUM_TIME=12:00 AM
+      - UPDATE_WINDOW_MAXIMUM_TIME=11:59 PM
+      - RESTART_NOTICE_MINUTES=30
+      - ENABLE_MOTD=FALSE
+      - MOTD=
+      - MOTD_DURATION=30
       - MAP_NAME=TheIsland
       - SESSION_NAME=${ARK_ISLAND_SESSION_NAME:-ark-island}
       - SERVER_ADMIN_PASSWORD=${ARK_SERVER_ADMIN_PASSWORD:-adminpassword}
-      - SERVER_PASSWORD=${ARK_SERVER_PASSWORD:-password}         # Set a server password or leave it blank (ONLY NUMBERS AND CHARACTERS ARE ALLOWED BY DEVS)
+      - SERVER_PASSWORD=${ARK_SERVER_PASSWORD:-password}
       - ASA_PORT=7777
       - RCON_PORT=27020
       - MAX_PLAYERS=19
       - CLUSTER_ID=cluster
-      - MOD_IDS=933975,929868,935528         # Add your mod IDs here, separated by commas, e.g., 123456789,987654321
-      - CUSTOM_SERVER_ARGS=                  # If You need to add more Custom Args -ForceRespawnDinos -ForceAllowCaveFlyers
+      - MOD_IDS=933975,929868,935528
+      - CUSTOM_SERVER_ARGS=
     ports:
       - "7777:7777/tcp"
       - "7777:7777/udp"
@@ -102,36 +155,49 @@ services:
       - "./games/ark/ASA_Island:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame"
       - "./games/ark/Dedicated Server:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server"
       - "./games/ark/Cluster:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ShooterGame"
-    mem_limit: 32G 
+    deploy:
+      resources:
+        limits:
+          memory: 32G
+    healthcheck:
+      test: ["CMD", "pgrep", "ShooterGameServer"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
+
   ark-scorched:
     build: .
     image: acekorneya/asa_server:latest
     container_name: ark-scorched
+    labels:
+      # game-watchdogが認識するためのラベル
+      - "game.type=ark"
     restart: unless-stopped
     environment:
-      - PUID=1001                            # The UID to run server as
-      - PGID=1001                            # The GID to run server as
-      - BATTLEEYE=FALSE                      # Set to TRUE to use BattleEye, FALSE to not use BattleEye
-      - RCON_ENABLED=TRUE                    # Needed for Graceful Shutdown / Updates / Server Notifications
-      - DISPLAY_POK_MONITOR_MESSAGE=FALSE    # TRUE to Show the Server Monitor Messages / Update Monitor 
-      - UPDATE_SERVER=TRUE                   # Enable or disable update checks
-      - CHECK_FOR_UPDATE_INTERVAL=24         # Check for Updates interval in hours
-      - UPDATE_WINDOW_MINIMUM_TIME=12:00 AM  # Defines the minimum time, relative to server time, when an update check should run
-      - UPDATE_WINDOW_MAXIMUM_TIME=11:59 PM  # Defines the maximum time, relative to server time, when an update check should run
-      - RESTART_NOTICE_MINUTES=30            # Duration in minutes for notifying players before a server restart due to updates
-      - ENABLE_MOTD=FALSE                    # Enable or disable Message of the Day
-      - MOTD=                                # Message of the Day
-      - MOTD_DURATION=30                     # Duration for the Message of the Day
+      - PUID=1001
+      - PGID=1001
+      - BATTLEEYE=FALSE
+      - RCON_ENABLED=TRUE
+      - DISPLAY_POK_MONITOR_MESSAGE=FALSE
+      - UPDATE_SERVER=TRUE
+      - CHECK_FOR_UPDATE_INTERVAL=24
+      - UPDATE_WINDOW_MINIMUM_TIME=12:00 AM
+      - UPDATE_WINDOW_MAXIMUM_TIME=11:59 PM
+      - RESTART_NOTICE_MINUTES=30
+      - ENABLE_MOTD=FALSE
+      - MOTD=
+      - MOTD_DURATION=30
       - MAP_NAME=ScorchedEarth
       - SESSION_NAME=${ARK_SCORCHED_SESSION_NAME:-ark-scorched}
       - SERVER_ADMIN_PASSWORD=${ARK_SERVER_ADMIN_PASSWORD:-adminpassword}
-      - SERVER_PASSWORD=${ARK_SERVER_PASSWORD:-password}         # Set a server password or leave it blank (ONLY NUMBERS AND CHARACTERS ARE ALLOWED BY DEVS)
+      - SERVER_PASSWORD=${ARK_SERVER_PASSWORD:-password}
       - ASA_PORT=7778
       - RCON_PORT=27021
       - MAX_PLAYERS=19
       - CLUSTER_ID=cluster
-      - MOD_IDS=933975,929868,935528         # Add your mod IDs here, separated by commas, e.g., 123456789,987654321
-      - CUSTOM_SERVER_ARGS=                  # If You need to add more Custom Args -ForceRespawnDinos -ForceAllowCaveFlyers
+      - MOD_IDS=933975,929868,935528
+      - CUSTOM_SERVER_ARGS=
     ports:
       - "7778:7778/tcp"
       - "7778:7778/udp"
@@ -139,7 +205,21 @@ services:
       - "./games/ark/scorchedEarth/ASA_scorchedEarth:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame"
       - "./games/ark/scorchedEarth/Dedicated_Server:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server"
       - "./games/ark/Cluster:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ShooterGame"
-    mem_limit: 32G 
+    deploy:
+      resources:
+        limits:
+          memory: 32G
+    healthcheck:
+      test: ["CMD", "pgrep", "ShooterGameServer"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
 
 volumes:
   rustds-data:
+
+networks:
+  default:
+    external: true
+    name: game-server_default
