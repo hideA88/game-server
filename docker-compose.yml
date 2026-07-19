@@ -141,7 +141,8 @@ services:
          QUERY_PORT: 9681
          PLAYERS: 16 # Optional but recommended
          SERVER_PASSWORD: ${PALWORLD_SERVER_PASSWORD:?Set PALWORLD_SERVER_PASSWORD in .env}
-         MULTITHREADING: true
+         ENABLE_PERF_THREADING_ARGS: true
+         WORKER_THREADS_SERVER: 12
          REST_API_ENABLED: true
          REST_API_PORT: 8212
          TZ: "UTC"
