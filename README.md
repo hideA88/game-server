@@ -5,7 +5,14 @@
 ## 構成
 
 - Minecraft Bedrock Edition Server
-- その他のゲームサーバー（予定）
+- Rust Dedicated Server
+- ARK: Survival Ascended Dedicated Server
+- Palworld Dedicated Server
+- WireGuardを使用したさくらVPS固定IPv4プロキシ
+
+## ネットワーク公開
+
+v6プラス環境から、さくらVPSの固定IPv4を経由してPalworldを公開する構成とインストール手順は、[さくらVPS経由でPalworldを公開する](docs/sakura-vps-palworld-proxy.md)を参照してください。ゲーム別の公開ポートは[ゲーム別プロキシポート](docs/game-proxy-ports.md)で管理します。
 
 ## ディレクトリ構造
 
@@ -35,7 +42,7 @@ cd game-server
 
 2. 環境変数の設定
 ```bash
-cp .env.example .env
+cp .env.template .env
 # .envファイルを編集して必要な設定を行う
 ```
 

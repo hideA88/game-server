@@ -1,0 +1,4 @@
+[Interface]
+Address = __WG_VPS_ADDRESS__
+ListenPort = __WG_PORT__
+PrivateKey = __PRIVATE_KEY__

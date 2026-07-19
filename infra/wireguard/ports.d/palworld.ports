@@ -1,0 +1,3 @@
+# protocol  public_port  home_port  purpose
+udp  9680  9680  gameplay
+udp  9681  9681  query

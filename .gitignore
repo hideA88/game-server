@@ -1,5 +1,15 @@
 # Environment variables
 .env
+.env.*
+!.env.template
+!*.env.example
+
+# WireGuard local configuration and generated secrets
+infra/wireguard/*.env
+!infra/wireguard/*.env.example
+infra/wireguard/generated/
+*.key
+*.psk
 
 # Game data directories
 games/*/data/
@@ -14,6 +24,7 @@ games/ark/Game.ini
 games/ark/GameUserSettings.ini
 games/ark/config/Game.ini
 games/ark/config/GameUserSettings.ini
+
 # Palworld server binaries, saves, and backups
 games/palworld/
 

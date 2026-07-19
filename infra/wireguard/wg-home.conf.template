@@ -1,0 +1,10 @@
+[Interface]
+Address = __WG_HOME_ADDRESS__
+PrivateKey = __PRIVATE_KEY__
+MTU = __WG_MTU__
+
+[Peer]
+PublicKey = __VPS_PUBLIC_KEY__
+Endpoint = __VPS_PUBLIC_IP__:__WG_PORT__
+AllowedIPs = __WG_VPS_ADDRESS__
+PersistentKeepalive = 25

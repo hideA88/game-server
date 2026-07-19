@@ -1,0 +1,14 @@
+[Unit]
+Description=Palworld proxy nftables rules
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/apply-game-proxy-nftables
+ExecReload=/usr/local/sbin/apply-game-proxy-nftables
+ExecStop=-/usr/sbin/nft delete table inet game_proxy
+
+[Install]
+WantedBy=multi-user.target

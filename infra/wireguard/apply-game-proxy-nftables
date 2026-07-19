@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+NFT_RULES=/etc/nftables.d/game-proxy.nft
+CHECK_RULES=$(mktemp)
+trap 'rm -f -- "${CHECK_RULES}"' EXIT
+
+sed '0,/table inet game_proxy/s//table inet game_proxy_check/' "${NFT_RULES}" >"${CHECK_RULES}"
+/usr/sbin/nft --check --file "${CHECK_RULES}"
+if /usr/sbin/nft list table inet game_proxy >/dev/null 2>&1; then
+    /usr/sbin/nft delete table inet game_proxy
+fi
+/usr/sbin/nft --file "${NFT_RULES}"

@@ -1,0 +1,4 @@
+# protocol  public_port  home_port  purpose
+udp  5584  5584  gameplay
+tcp  5584  5584  optional-tcp
+udp  5585  5585  query
