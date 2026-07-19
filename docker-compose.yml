@@ -3,6 +3,7 @@ services:
     image: ghcr.io/hidea88/game-server-watchdog:latest
     container_name: game-watchdog
     restart: unless-stopped
+    user: root
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - ALLOWED_CHANNEL_IDS=${ALLOWED_CHANNEL_IDS}
@@ -20,6 +21,12 @@ services:
       - /sys:/host/sys:ro
     security_opt:
       - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "game-server-watchdog"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
     deploy:
       resources:
         limits:
@@ -74,15 +81,17 @@ services:
       # game-watchdogが認識するためのラベル
       - "game.type=rust"
     ports:
-      - 28015-28016:28015-28016
-      - 28015:28015/udp
-      - 8080:8080
+      - "5584:5584/udp"  # game
+      - "5585:5585/udp"  # queryport
+      - "5586:5586/tcp"  # RCON
+      - "5584:5584/tcp"  # optional TCP
+      - "8080:8080"
     volumes:
       - rustds-data:/steamcmd/rust
       - ./games/rust/logs:/steamcmd/rust/logs
     environment:
       TZ: Asia/Tokyo
-      RUST_SERVER_STARTUP_ARGUMENTS: -batchmode -nographics  +decay.scale 0.3
+      RUST_SERVER_STARTUP_ARGUMENTS: -batchmode -nographics +server.port 5584 +server.queryport 5585 +rcon.port 5586 +decay.scale 0.3
       RUST_SERVER_IDENTITY: ${RUST_SERVER_IDENTITY:-rust}
       RUST_SERVER_SEED: ${RUST_SERVER_SEED:-1234568}
       RUST_SERVER_NAME: ${RUST_SERVER_NAME:-Rust dedicated server}
@@ -115,6 +124,34 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+  palworld:
+      image: thijsvanloef/palworld-server-docker:latest
+      restart: unless-stopped
+      container_name: palworld-server
+      stop_grace_period: 30s # Set to however long you are willing to wait for the container to gracefully stop
+      ports:
+        - 9680:9680/udp
+        - 9681:9681/udp
+        # - 8212:8212/tcp  # Port for REST API if REST_API_ENABLED: true
+      environment:
+         PUID: 1000
+         PGID: 1000
+         PORT: 9680 # Optional but recommended
+         QUERY_PORT: 9681
+         PLAYERS: 16 # Optional but recommended
+         SERVER_PASSWORD: ${PALWORLD_SERVER_PASSWORD:?Set PALWORLD_SERVER_PASSWORD in .env}
+         MULTITHREADING: true
+         REST_API_ENABLED: true
+         REST_API_PORT: 8212
+         TZ: "UTC"
+         ADMIN_PASSWORD: ${PALWORLD_ADMIN_PASSWORD:?Set PALWORLD_ADMIN_PASSWORD in .env}
+         COMMUNITY: true  # Enable this if you want your server to show up in the community servers tab, USE WITH SERVER_PASSWORD!
+         SERVER_NAME: "dasukal-server"
+         SERVER_DESCRIPTION: "only dasukal frend"
+         CROSSPLAY_PLATFORMS: "(Steam,Xbox,PS5,Mac)"
+      volumes:
+         - ./games/palworld:/palworld/
 
   ark-island:
     build: .

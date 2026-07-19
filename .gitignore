@@ -14,6 +14,8 @@ games/ark/Game.ini
 games/ark/GameUserSettings.ini
 games/ark/config/Game.ini
 games/ark/config/GameUserSettings.ini
+# Palworld server binaries, saves, and backups
+games/palworld/
 
 # Log files
 shared/logs/*
