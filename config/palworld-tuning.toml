@@ -1,0 +1,78 @@
+# Palworld ゲームバランス調整
+#
+# 下の値を編集して保存したあと、Codexに「この設定を反映して」と依頼してください。
+# サーバーのデフォルトと異なる値だけをComposeへ追加します。
+# Palworldコンテナの再作成後に反映されます。
+
+[progression]
+# 経験値倍率。仲間内サーバーの目安: 1.0～2.0
+exp_rate = 1.0
+
+# 捕獲率倍率。仲間内サーバーの目安: 1.0～1.5
+pal_capture_rate = 1.0
+
+# 巨大タマゴの孵化時間（時間）。0.25で約15分。
+pal_egg_default_hatching_time = 0.25
+
+# 通常の作業速度倍率。目安: 1.0～1.5
+work_speed_rate = 1.0
+
+# 牧場の生産速度倍率。目安: 1.0～2.0
+monster_farm_action_speed_rate = 1.0
+
+# アイテム重量倍率。小さいほど軽くなる。
+item_weight_rate = 1.0
+
+[resources]
+# 採集素材の取得量倍率。
+collection_drop_rate = 1.0
+
+# 敵のアイテムドロップ量倍率。
+enemy_drop_item_rate = 1.0
+
+# 木や岩などの耐久倍率。小さいほど早く壊せる。
+collection_object_hp_rate = 1.0
+
+# 採集物の復活間隔倍率。小さいほど早く復活する。
+collection_object_respawn_speed_rate = 1.0
+
+# 地面に落ちたアイテムが消えるまでの時間。
+drop_item_alive_max_hours = 1.0
+
+[survival]
+# 小さいほど空腹・スタミナの減少が遅くなる。
+player_stomach_decrease_rate = 0.8
+player_stamina_decrease_rate = 1.0
+pal_stomach_decrease_rate = 0.5
+pal_stamina_decrease_rate = 1.0
+
+# デスペナ選択肢: "None", "Item", "ItemAndEquipment", "All"
+death_penalty = "Item"
+
+[world]
+# 時間経過倍率。小さいほど遅く、大きいほど速い。
+day_time_speed_rate = 1.0
+night_time_speed_rate = 1.25
+
+# パル出現数倍率。1.0より大きくするとサーバー負荷も増える。
+pal_spawn_num_rate = 1.0
+
+# 拠点襲撃イベントを有効にする。
+enable_invader_enemy = true
+
+# 建築物の劣化倍率。0で劣化ダメージを無効化。
+build_object_deterioration_damage_rate = 0
+
+# 隕石・補給物資の間隔（分）。
+supply_drop_span = 180
+
+[base]
+# 拠点で働けるパル数。公式上限: 50。
+base_camp_worker_max_num = 25
+
+# ギルド当たりの拠点数。公式上限: 10。
+base_camp_max_num_in_guild = 7
+
+[operation]
+# オートセーブ間隔（秒）。
+auto_save_span = 30.0

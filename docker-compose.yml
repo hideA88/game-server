@@ -140,16 +140,27 @@ services:
          PORT: 9680 # Optional but recommended
          QUERY_PORT: 9681
          PLAYERS: 16 # Optional but recommended
+         PAL_EGG_DEFAULT_HATCHING_TIME: "3"
+         PLAYER_STOMACH_DECREASE_RATE: "0.8"
+         PAL_STOMACH_DECREASE_RATE: "0.5"
+         NIGHTTIME_SPEEDRATE: "1.25"
+         BUILD_OBJECT_DETERIORATION_DAMAGE_RATE: "0"
          SERVER_PASSWORD: ${PALWORLD_SERVER_PASSWORD:?Set PALWORLD_SERVER_PASSWORD in .env}
-         ENABLE_PERF_THREADING_ARGS: true
-         WORKER_THREADS_SERVER: 12
          REST_API_ENABLED: true
          REST_API_PORT: 8212
+         # グローバルパルボックスの出し入れを許可（Importはイメージのデフォルトが False）
+         ALLOW_GLOBAL_PALBOX_EXPORT: "True"
+         ALLOW_GLOBAL_PALBOX_IMPORT: "True"
+         BASE_CAMP_MAX_NUM_IN_GUILD: 7  # ギルド当たりの拠点数（デフォルト4／公式上限10）
+         BASE_CAMP_WORKER_MAX_NUM: 25
+         DISABLE_GENERATE_SETTINGS: true
          TZ: "UTC"
          ADMIN_PASSWORD: ${PALWORLD_ADMIN_PASSWORD:?Set PALWORLD_ADMIN_PASSWORD in .env}
          COMMUNITY: true  # Enable this if you want your server to show up in the community servers tab, USE WITH SERVER_PASSWORD!
-         SERVER_NAME: "dasukal-server"
-         SERVER_DESCRIPTION: "only dasukal frend"
+         PUBLIC_IP: ${PALWORLD_PUBLIC_IP:?Set PALWORLD_PUBLIC_IP in .env}
+         PUBLIC_PORT: ${PALWORLD_PUBLIC_PORT:-9680}
+         SERVER_NAME: "${PALWORLD_SERVER_NAME:?Set PALWORLD_SERVER_NAME in .env}"
+         SERVER_DESCRIPTION: "${PALWORLD_SERVER_DESCRIPTION:-}"
          CROSSPLAY_PLATFORMS: "(Steam,Xbox,PS5,Mac)"
       volumes:
          - ./games/palworld:/palworld/
