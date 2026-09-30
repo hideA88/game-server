@@ -169,7 +169,7 @@ NFT_HEADER
         protocol=${PROXY_PROTOCOLS[index]}
         home_port=${PROXY_HOME_PORTS[index]}
         purpose=${PROXY_PURPOSES[index]}
-        printf '        iifname "%s" oifname "%s" ip daddr %s %s dport %s ct state new,established counter comment "%s: %s" accept\n' \
+        printf '        iifname "%s" oifname "%s" ip daddr %s %s dport %s ct state new,established counter accept comment "%s: %s"\n' \
             "${VPS_PUBLIC_INTERFACE}" "${WG_INTERFACE}" "${WG_HOME_IP}" "${protocol}" "${home_port}" "${game}" "${purpose}" \
             >>"${destination}"
     done
@@ -188,8 +188,8 @@ NFT_MIDDLE
         public_port=${PROXY_PUBLIC_PORTS[index]}
         home_port=${PROXY_HOME_PORTS[index]}
         purpose=${PROXY_PURPOSES[index]}
-        printf '        iifname "%s" %s dport %s counter comment "%s: %s" dnat ip to %s:%s\n' \
-            "${VPS_PUBLIC_INTERFACE}" "${protocol}" "${public_port}" "${game}" "${purpose}" "${WG_HOME_IP}" "${home_port}" \
+        printf '        iifname "%s" %s dport %s counter dnat ip to %s:%s comment "%s: %s"\n' \
+            "${VPS_PUBLIC_INTERFACE}" "${protocol}" "${public_port}" "${WG_HOME_IP}" "${home_port}" "${game}" "${purpose}" \
             >>"${destination}"
     done
 
@@ -205,7 +205,7 @@ NFT_MIDDLE
         protocol=${PROXY_PROTOCOLS[index]}
         home_port=${PROXY_HOME_PORTS[index]}
         purpose=${PROXY_PURPOSES[index]}
-        printf '        oifname "%s" ip daddr %s %s dport %s counter comment "%s: %s" masquerade\n' \
+        printf '        oifname "%s" ip daddr %s %s dport %s counter masquerade comment "%s: %s"\n' \
             "${WG_INTERFACE}" "${WG_HOME_IP}" "${protocol}" "${home_port}" "${game}" "${purpose}" \
             >>"${destination}"
     done
