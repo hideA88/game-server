@@ -1,0 +1,22 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Random First Spawn",
+    "description": "Sends each player to a random spot on their first join.",
+    "uuid": "07d5c1a6-a9a4-4851-8f13-29d4dc936ff3",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 26, 50]
+  },
+  "modules": [
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "82193553-e72b-404e-8fcd-4ae03025014d",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    { "module_name": "@minecraft/server", "version": "2.10.0" }
+  ]
+}

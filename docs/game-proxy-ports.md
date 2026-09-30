@@ -6,6 +6,7 @@ WireGuardトンネルは全ゲームで共用し、VPSから自宅へ転送す�
 
 ```text
 infra/wireguard/ports.d/
+├── minecraft.ports
 ├── palworld.ports
 └── rust.ports
 ```
@@ -23,6 +24,21 @@ Palworldの定義:
 udp  9680  9680  gameplay
 udp  9681  9681  query
 ```
+
+Minecraft Bedrock Editionの定義:
+
+```text
+# protocol  public_port  home_port  purpose
+tcp  19132  19132  gameplay
+udp  19132  19132  gameplay
+udp  19140  19140  nethernet-19140   # 〜19149まで
+udp  30000  30000  mcxbox-ice-30000  # 〜30009まで
+```
+
+BDS 1.26.5x以降はNetherNetのみ対応です。`19132/tcp`でシグナリングし、その後プレイヤーごとに
+`19140-19149/udp`のいずれかでゲーム通信します（`SERVER_UDP_PORTS`でVPS固定IPv4を広告）。
+`30000-30009/udp`はMCXboxBroadcast（PS5などのフレンド参加）のICE通信用です。`19133/udp`は
+Bedrock ServerのIPv6用ポートであり、このVPS IPv4プロキシには追加しません。
 
 Rustの定義:
 
@@ -49,6 +65,12 @@ PalworldとRust:
 
 ```dotenv
 ENABLED_GAMES=palworld,rust
+```
+
+PalworldとMinecraft:
+
+```dotenv
+ENABLED_GAMES=palworld,minecraft
 ```
 
 現在の公開予定を確認します。
@@ -101,6 +123,7 @@ VPS側ではゲーム名と用途を含むnftablesルールが再生成されま
 - VPS側と自宅側の`ENABLED_GAMES`を一致させる
 - Docker Composeで自宅ホストに公開しているポートと`home_port`を一致させる
 - さくらVPSのパケットフィルターにも`vps_public_port`を追加する
+- Minecraft Bedrock Editionを公開する場合は、VPSの固定IPv4で`19132/tcp`、`19132/udp`、`19140-19149/udp`、`30000-30009/udp`を許可する
 - REST APIやRCONなど、インターネット公開が不要な管理ポートは定義しない
 - RCONを公開する場合は送信元IP制限などの追加保護を行う
 - 使わなくなったゲームは`ENABLED_GAMES`から削除し、VPSスクリプトを再実行する

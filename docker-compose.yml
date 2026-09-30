@@ -47,10 +47,19 @@ services:
       - ./games/minecraft/data/worlds:/data/worlds
       - ./shared/logs:/var/log/minecraft
     ports:
+      - "19132:19132/tcp" # NetherNet gameplay (Bedrock 1.26+)
       - "19132:19132/udp" # IPv4 gameplay
       - "19133:19133/udp" # IPv6 gameplay
+      - "19140-19149:19140-19149/udp" # NetherNet per-client gameplay UDP (ICE)
     environment:
       - EULA=TRUE
+      - TRANSPORT=nethernet
+      # NetherNet negotiates a separate UDP connection per client. Pin it to a
+      # forwarded range and advertise the VPS address so remote clients reach it.
+      - SERVER_UDP_PORTS=${MINECRAFT_PUBLIC_IP:?Set MINECRAFT_PUBLIC_IP in .env}:19140-19149:19140-19149
+      - SERVER_PORT=19132
+      # Force clients (incl. PS5) to download the world add-on resource packs
+      - TEXTUREPACK_REQUIRED=true
       - GAMEMODE=survival
       - DIFFICULTY=normal
       - LEVEL_NAME=${MINECRAFT_LEVEL_NAME:-Bedrock level}
@@ -67,12 +76,36 @@ services:
           cpus: '2'
           memory: 4G
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "nc", "-z", "-v", "localhost", "19132"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+
+  mcxboxbroadcast:
+    image: ghcr.io/mcxboxbroadcast/standalone:latest
+    container_name: mcxboxbroadcast
+    # The image's application files are readable only by its own UID; root is
+    # used solely to write the bind-mounted token store owned by this host.
+    user: "0:0"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      # Required only to traverse the image's app-owned /opt/app directory.
+      - DAC_OVERRIDE
+      - DAC_READ_SEARCH
+    depends_on:
+      minecraft:
+        condition: service_healthy
+    volumes:
+      # Contains the Microsoft/Xbox device-login token; deliberately Git-ignored.
+      - ./config/mcxboxbroadcast:/opt/app/config
+    ports:
+      # Restricted WebRTC/NetherNet ICE range; each joining player uses one port.
+      - "30000-30009:30000-30009/udp"
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   rust:
     image: didstopia/rust-server

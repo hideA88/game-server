@@ -35,6 +35,9 @@ games/*/logs/
 # Docker volumes
 volumes/
 
+# MCXboxBroadcast device-login tokens and session cache
+config/mcxboxbroadcast/
+
 # IDE specific files
 .idea/
 .vscode/
@@ -43,4 +46,10 @@ volumes/
 
 # OS specific files
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Downloaded third-party add-ons (All Rights Reserved; do not redistribute)
+games/minecraft/addons/
+
+# Local world backups
+games/*/backups/
